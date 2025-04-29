@@ -1,0 +1,126 @@
+/* 1. 引入 Tailwind 的基础样式（重置默认浏览器样式） */
+@tailwind base;
+
+/* 2. 引入 Tailwind 预设的组件类（例如按钮、表单样式） */
+@tailwind components;
+
+/* 3. 引入 Tailwind 的工具类（例如背景色、字体大小、边距等） */
+@tailwind utilities;
+
+/* ✅ 自定义 Tailwind-compatible 样式 */
+
+.active-tab {
+  @apply text-white bg-red-600 relative;
+}
+
+/* 背景动画 */
+@keyframes gradient-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient {
+  background-size: 300% 300%;
+  animation: gradient-flow 10s ease infinite;
+}
+
+/* 弹窗 */
+.popup-panel {
+  @apply fixed top-32 left-1/2 -translate-x-1/2 w-[30rem] bg-white rounded-xl shadow-xl p-6 z-50 transition-all duration-300;
+}
+
+.popup-header {
+  @apply flex justify-between items-center mb-4;
+}
+
+.popup-body {
+  @apply text-sm text-gray-700;
+}
+
+/* 发光按钮动画 */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(255, 100, 255, 0.3), 0 0 24px rgba(100, 200, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 100, 255, 0.6), 0 0 40px rgba(100, 200, 255, 0.4);
+  }
+}
+
+.btn-glow {
+  animation: glowPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes buttonGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(0, 128, 255, 0.4), 0 0 20px rgba(0, 128, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0, 128, 255, 0.8), 0 0 40px rgba(0, 128, 255, 0.5);
+  }
+}
+
+.glow-pulse {
+  animation: buttonGlow 2.5s ease-in-out infinite;
+}
+
+/* 滚动条样式（可选） */
+#tournamentPanel::-webkit-scrollbar {
+  width: 6px;
+}
+
+#tournamentPanel::-webkit-scrollbar-thumb {
+  background-color: rgba(59, 130, 246, 0.6); /* blue-500 */
+  border-radius: 10px;
+}
+
+#tournamentPanel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 为了Firefox兼容 因为Firefox不支持webkit*/
+#tournamentPanel {
+	scrollbar-width: thin;
+	scrollbar-color: rgba(59, 130, 246, 0.6) transparent;
+  }
+
+/* 添加自定义动画 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* 添加优雅的滚动条样式 */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(107, 114, 128, 0.5);
+  border-radius: 20px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(107, 114, 128, 0.7);
+}
+
+/* 添加自定义过渡效果 */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* 为消息卡片添加阴影变化效果 */
+.hover\:shadow-lg:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}

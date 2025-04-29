@@ -1,0 +1,171 @@
+// prisma/schema.prisma
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
+}
+
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum MatchType {
+  NORMAL
+  TOURNAMENT
+}
+
+model Match {
+  id        Int       @id @default(autoincrement())
+  user1     User      @relation("User1", fields: [user1Id], references: [id])
+  user1Id   Int
+  user2     User      @relation("User2", fields: [user2Id], references: [id])
+  user2Id   Int
+  score1    Int
+  score2    Int
+  playedAt  DateTime  @default(now())
+  matchType MatchType @default(NORMAL)
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  displayName String   @unique
+  password    String
+  avatarUrl   String?  @default("https://api.dicebear.com/7.x/pixel-art/svg?seed=default")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  matchesAsUser1 Match[] @relation("User1")
+  matchesAsUser2 Match[] @relation("User2")
+
+  matchType MatchType @default(NORMAL)
+
+  friends  Friend[] @relation("UserFriends")
+  friendOf Friend[] @relation("FriendOf")
+
+  is2FAEnabled Boolean   @default(false)
+  twoFACode    String? // 当前验证码（哈希后保存）
+  twoFAExpires DateTime?
+
+  sentMessages     PrivateMessage[] @relation("SentMessages")
+  receivedMessages PrivateMessage[] @relation("ReceivedMessages")
+
+  blocks    BlockedUser[] @relation("Blocker")
+  blockedBy BlockedUser[] @relation("Blocked")
+
+  channelMembers    ChannelMember[]
+  channelMessages   ChannelMessage[]
+}
+
+model Friend {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation("UserFriends", fields: [userId], references: [id])
+  userId    Int
+  friend    User     @relation("FriendOf", fields: [friendId], references: [id])
+  friendId  Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, friendId])
+  @@index([userId])
+  @@index([friendId])
+}
+
+model Tournament {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  players TournamentPlayer[]
+  matches TournamentMatch[]
+}
+
+model TournamentMatch {
+  id           Int        @id @default(autoincrement())
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  tournamentId Int
+
+  player1Alias String
+  player2Alias String
+  winnerAlias  String
+  score1       Int
+  score2       Int
+
+  playedAt DateTime @default(now())
+}
+
+model TournamentPlayer {
+  id    Int    @id @default(autoincrement())
+  alias String
+  score Int    @default(0)
+
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  tournamentId Int
+}
+
+model PrivateMessage {
+  id         Int      @id @default(autoincrement())
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+  senderId   Int
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  receiverId Int
+  content    String
+  metadata   String?  // 确保 metadata 字段存在且为可选字符串
+  sentAt     DateTime @default(now())
+}
+
+model BlockedUser {
+  id        Int  @id @default(autoincrement())
+  blocker   User @relation("Blocker", fields: [blockerId], references: [id])
+  blockerId Int
+  blocked   User @relation("Blocked", fields: [blockedId], references: [id])
+  blockedId Int
+
+  createdAt DateTime @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+}
+
+model Channel {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  description String?
+  isPrivate   Boolean      @default(false)
+  password    String?      // 加密频道密码(hash值)
+  createdAt   DateTime     @default(now())
+  
+  // 关联
+  members     ChannelMember[]
+  messages    ChannelMessage[]
+}
+
+model ChannelMember {
+  id          Int         @id @default(autoincrement())
+  userId      Int
+  channelId   String
+  displayName String      // 用户在频道中的显示名
+  isAdmin     Boolean     @default(false)
+  isMuted     Boolean     @default(false)
+  muteEndTime DateTime?
+  joinedAt    DateTime    @default(now())
+  
+  // 关联
+  user        User        @relation(fields: [userId], references: [id])
+  channel     Channel     @relation(fields: [channelId], references: [id])
+  
+  @@unique([userId, channelId])
+}
+
+model ChannelMessage {
+  id          Int         @id @default(autoincrement())
+  content     String
+  createdAt   DateTime    @default(now())
+  userId      Int
+  channelId   String
+  
+  // 关联
+  user        User        @relation(fields: [userId], references: [id])
+  channel     Channel     @relation(fields: [channelId], references: [id])
+}
